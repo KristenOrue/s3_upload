@@ -65,7 +65,7 @@ when 'upload'
   if file == nil
     puts "You must enter a file name to upload to S3!"
     exit
-  else 
+  else
     file_name= File.basename file
     s3_client.put_object( bucket: bucket_name, key: file_name)
     puts "SUCCESS: File '#{file_name}' successfuly uploaded to bucket '#{bucket_name}'."
