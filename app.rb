@@ -76,6 +76,26 @@ when 'upload'
     puts "SUCCESS: File '#{file_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
+when 'upload_folder'
+  if file == nil
+    puts "You must enter a folder path to upload to S3!"
+    exit
+  else
+    folder_name = File.basename(file, ".*")
+    is_a_directory= File.directory?(folder_name)
+    files_in_directory = Dir.children(folder_name)
+
+
+    puts folder_name
+    puts is_a_directory
+    puts files_in_directory
+
+#   s3_client.create_multipart_upload(
+#   bucket: "examplebucket", 
+#   key: "largeobject", 
+# )
+  end
+
 #To list the objects inside of a bucket
 when 'list'
   if bucket_name == nil
