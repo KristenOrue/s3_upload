@@ -65,6 +65,7 @@ new_name = ARGV[3] if (ARGV.length > 3)
 
 #Different the operation name matches ARGV[1]
 case operation
+
 #To upload a file to the s3 bucket
 when 'upload'
   if file == nil
@@ -76,6 +77,7 @@ when 'upload'
     puts "SUCCESS: File '#{file_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
+#To upload a folder/alum/directory
 when 'upload_folder'
   if file == nil
     puts "You must enter a folder path to upload to S3!"
@@ -84,11 +86,9 @@ when 'upload_folder'
     folder_name = File.basename(file, ".*")
     is_a_directory= File.directory?(folder_name)
     files_in_directory = Dir.children(folder_name)
-
-
-    puts folder_name
-    puts is_a_directory
-    puts files_in_directory
+    # puts folder_name
+    # puts is_a_directory
+    # puts files_in_directory
 
     Dir.foreach(file) do |filename|
       next if filename == '.' or filename == '..'
@@ -115,6 +115,7 @@ when 'list'
       end
     end
 
+#To rename an existing object inside of a bucket
   when 'rename'
     if file == nil && new_name == nil
       puts "You must enter a file name and the new name of that file to rename!"
@@ -128,7 +129,6 @@ when 'list'
       s3_client.delete_object(bucket: bucket_name,
                      key: file_name)
     end
-
 else
   puts "Unknown operation: '%s'!" % operation
   puts USAGE
