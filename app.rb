@@ -90,10 +90,10 @@ when 'upload_folder'
     puts is_a_directory
     puts files_in_directory
 
-#   s3_client.create_multipart_upload(
-#   bucket: "examplebucket", 
-#   key: "largeobject", 
-# )
+    Dir.foreach(file) do |filename|
+      next if filename == '.' or filename == '..'
+      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+    end
   end
 
 #To list the objects inside of a bucket
