@@ -1,3 +1,7 @@
+#Reference: https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/hello.html
+#Reference: https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/s3-example-upload-bucket-item.html
+#Reference: https://docs.aws.amazon.com/sdk-for-ruby/v2/api/Aws/S3/Client.html
+
 require 'aws-sdk'
 require 'aws-sdk-s3'
 
@@ -50,17 +54,36 @@ s3_client = Aws::S3::Client.new(credentials: role_credentials)
 
 #Different the operation name matches ARGV[1]
 case operation
+#To upload a file to the s3 bucket
 when 'upload'
   if file == nil
     puts "You must enter a file name to upload to S3!"
     exit
   else 
     file_name= File.basename file
-    # puts "File has been stored: '%s'" %file_name
-    # puts "Bucket has been stored: '%s'" %bucket_name
     s3_client.put_object( bucket: bucket_name, key: file_name)
-    puts "File '#{file_name}' uploaded to bucket '#{bucket_name}'."
+    puts "SUCCESS: File '#{file_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
+
+#To list the objects inside of a bucket
+when 'list'
+  if bucket_name == nil
+    puts "You must enter a Bucket-name!"
+    exit
+  else
+#Enumerate the bucket contents and object etags
+    puts "Contents of '%s':" % bucket_name
+    objects = s3_client.list_objects_v2(
+    bucket: bucket_name, max_keys: 2).contents
+      if objects.count.zero?
+        puts "No objects in bucket '#{bucket_name}'."
+        return
+      else
+        objects.each do |object|
+          puts object.key
+        end
+      end
+    end
 else
   puts "Unknown operation: '%s'!" % operation
   puts USAGE
