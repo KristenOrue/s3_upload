@@ -93,7 +93,11 @@ when 'upload_folder'
     Dir.foreach(file) do |filename|
       next if filename == '.' or filename == '..'
       s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      if is_a_directory==true
+        s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      end
     end
+    puts "SUCCESS: Folder '#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
 #To list the objects inside of a bucket
