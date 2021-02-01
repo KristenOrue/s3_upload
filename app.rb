@@ -1,6 +1,8 @@
 #Reference: https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/hello.html
 #Reference: https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/s3-example-upload-bucket-item.html
 #Reference: https://docs.aws.amazon.com/sdk-for-ruby/v2/api/Aws/S3/Client.html
+#Reference: https://docs.aws.amazon.com/code-samples/latest/catalog/ruby-s3-s3-ruby-example-list-bucket-items.rb.html
+#Reference: https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/aws-sdk-ruby-dg.pdf
 
 require 'aws-sdk'
 require 'aws-sdk-s3'
@@ -41,6 +43,10 @@ operation = ARGV[1] if (ARGV.length > 1)
 #The file name to use alongside 'upload'
 file = nil
 file = ARGV[2] if (ARGV.length > 2)
+
+#The new name to use alongside 'rename'
+new_name = nil
+new_name = ARGV[3] if (ARGV.length > 3)
 
 #assume the role
 role_credentials = Aws::AssumeRoleCredentials.new(
@@ -83,6 +89,21 @@ when 'list'
         end
       end
     end
+
+  when 'rename'
+    if file == nil && new_name == nil
+      puts "You must enter a file name and the new name of that file to rename!"
+      exit
+    else
+      file_name=File.basename file 
+      s3_client.copy_object(bucket: bucket_name,
+                   copy_source: "#{bucket_name}/#{file_name}",
+                   key: new_name)
+
+      s3_client.delete_object(bucket: bucket_name,
+                     key: file_name)
+    end
+
 else
   puts "Unknown operation: '%s'!" % operation
   puts USAGE
