@@ -16,6 +16,8 @@ The main bucket is "meusick-bucket"
 ### Installing
 
 * How/where to download your program
+Clone this repo: https://github.com/KristenOrue/s3_upload
+
 * Any modifications needed to be made to files/folders
 
 ### Executing program
@@ -28,11 +30,17 @@ ruby app.rb meusick-bucket list
 ```
 To upload an object to an s3 bucket:
 ```
-ruby app.rb meusick-bucket upload [FILE_NAME] or [FILE_PATH]
+ruby app.rb meusick-bucket upload [FILE_PATH]
 ```
-To upload a folder/album/artist:
+
+To upload an album (A folder of songs):
 ```
-ruby app.rb meusick-bucket upload_folder [FOLDER_NAME] or [FOLDER_PATH] 
+ruby app.rb meusick-bucket upload_album [FILE_PATH] 
+```
+
+To upload an Artist (A folder of albums/folders of songs):
+```
+ruby app.rb meausick-bucket upload_artist [FILE_PATH]
 ```
 
 To rename an existing file:
@@ -56,7 +64,7 @@ This project is licensed under the Kristen Orue License - see the LICENSE.md fil
 
 ## Acknowledgments
 
-Inspiration, code snippets, etc.
+References code snippets, etc.
 * [command-line help](https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/hello.html)
 * [upload_file support](https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/s3-example-upload-bucket-item.html)
 * [Client-methods API](https://docs.aws.amazon.com/sdk-for-ruby/v2/api/Aws/S3/Client.html)

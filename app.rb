@@ -90,9 +90,7 @@ when 'upload_artist'
     if inner_file.directory? 
       Dir.each_child(inner_file) do |song_names|
         s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
-      end    
-      # song_names= Dir.children(inner_file)
-      # s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")    
+      end      
     end
 }
     puts "SUCCESS: Artist'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
