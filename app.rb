@@ -6,6 +6,7 @@
 
 require 'aws-sdk'
 require 'aws-sdk-s3'
+require 'pathname'
 
 #Command Line argument work
 NO_SUCH_BUCKET = "The bucket '%s' does not exist!"
@@ -83,20 +84,34 @@ when 'upload_folder'
     exit
   else
     folder_name = File.basename(file, ".*")
-    # is_a_directory= File.directory?(folder_name)
-    files_in_directory = Dir.children(folder_name)
+    files_in_directory = Dir.each_child(folder_name)
+    is_a_directory= File.directory?(folder_name)
     # puts folder_name
     # puts is_a_directory
     # puts files_in_directory
-    Dir.each_child(file) do |filename|
-      # next if filename == '.' or filename == '..'
-      pp filename
-      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-      is_a_directory= File.directory?(filename)
-      if is_a_directory==true
-        s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}#{folder_name}/#{filename}")
-      end
+    # files_in_directory.each {|file| pp File.directory?(file)}
+
+    # path_names = Pathname.new(folder_name).children.select { |c| c.directory? }
+
+    path_names = Pathname(folder_name).each_child {|inner_file| 
+    if inner_file.directory? 
+      song_names= Dir.children(inner_file)
+      s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
+  
+      # Dir.each_child(file) do |filename|
+      #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      # end
     end
+}
+   
+    # puts files
+    # Dir.each_child(file) do |filename|
+    #   next if filename == '.' or filename == '..'
+    #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+    #   # if is_a_directory==true
+    #   #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+    #   # end
+    # end
     puts "SUCCESS: Folder '#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
