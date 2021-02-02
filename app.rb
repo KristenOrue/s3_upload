@@ -83,18 +83,19 @@ when 'upload_folder'
     exit
   else
     folder_name = File.basename(file, ".*")
-    is_a_directory= File.directory?(folder_name)
+    # is_a_directory= File.directory?(folder_name)
     files_in_directory = Dir.children(folder_name)
     # puts folder_name
     # puts is_a_directory
     # puts files_in_directory
-
     Dir.each_child(file) do |filename|
-      next if filename == '.' or filename == '..'
-      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}#{folder_name}/#{filename}")
-      # if is_a_directory==true
-      #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-      # end
+      # next if filename == '.' or filename == '..'
+      pp filename
+      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      is_a_directory= File.directory?(filename)
+      if is_a_directory==true
+        s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}#{folder_name}/#{filename}")
+      end
     end
     puts "SUCCESS: Folder '#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
@@ -131,6 +132,7 @@ when 'list'
 
       s3_client.delete_object(bucket: bucket_name,
                      key: file_name)
+      puts "SUCCESS: File '#{file_name}' successfuly changed name to '#{new_name}'."
     end
 else
   puts "Unknown operation: '%s'!" % operation
