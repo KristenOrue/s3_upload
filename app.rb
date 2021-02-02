@@ -21,8 +21,10 @@ bucket_name (required) is the name of the bucket
 
 operation   is the operation to perform on the bucket:
             upload  - uploads a file to the bucket
+            upload_album - uploads an album to the s3bucket
+            upload_artist - uploads an artist to the s3bucket
+            rename       - renames an existing file in the s3bucket
             list    - lists bucket objects in a particular s3 bucket
-            rename  - Allows you to rename a file in an s3 bucket
 
 file_name   is the name of the file to upload, which can be a File path or a filename
             required when operation is 'upload'
@@ -78,41 +80,36 @@ when 'upload'
   end
 
 #To upload a folder/alum/directory
-when 'upload_folder'
+when 'upload_artist'
   if file == nil
     puts "You must enter a folder path to upload to S3!"
     exit
   else
     folder_name = File.basename(file, ".*")
-    files_in_directory = Dir.each_child(folder_name)
-    is_a_directory= File.directory?(folder_name)
-    # puts folder_name
-    # puts is_a_directory
-    # puts files_in_directory
-    # files_in_directory.each {|file| pp File.directory?(file)}
-
-    # path_names = Pathname.new(folder_name).children.select { |c| c.directory? }
-
     path_names = Pathname(folder_name).each_child {|inner_file| 
     if inner_file.directory? 
-      song_names= Dir.children(inner_file)
-      s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
-    else
-      Dir.each_child(file) do |filename|
-        s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-      end
+      Dir.each_child(inner_file) do |song_names|
+        s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
+      end    
+      # song_names= Dir.children(inner_file)
+      # s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")    
     end
 }
-   
-    # puts files
-    # Dir.each_child(file) do |filename|
-    #   next if filename == '.' or filename == '..'
-    #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-    #   # if is_a_directory==true
-    #   #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-    #   # end
-    # end
-    puts "SUCCESS: Folder '#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
+    puts "SUCCESS: Artist'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
+  end
+
+#To upload an album
+when 'upload_album'
+  if file == nil
+    puts "You must enter a folder path to upload to S3!"
+    exit
+  else
+    folder_name = File.basename(file, ".*")
+    Dir.each_child(file) do |filename|
+      next if filename == '.' or filename == '..'
+      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+    end
+    puts "SUCCESS: Album'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
 #To list the objects inside of a bucket
