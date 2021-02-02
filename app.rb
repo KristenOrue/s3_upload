@@ -118,7 +118,7 @@ when 'list'
   else
     puts "Contents of '%s':" % bucket_name
     objects = s3_client.list_objects_v2(
-    bucket: bucket_name, max_keys: 5).contents
+    bucket: bucket_name, max_keys: 10).contents
       if objects.count.zero?
         puts "No objects in bucket '#{bucket_name}'."
         return
