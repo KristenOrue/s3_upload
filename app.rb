@@ -89,9 +89,9 @@ when 'upload_folder'
     # puts is_a_directory
     # puts files_in_directory
 
-    Dir.foreach(file) do |filename|
+    Dir.each_child(file) do |filename|
       next if filename == '.' or filename == '..'
-      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}#{folder_name}/#{filename}")
       # if is_a_directory==true
       #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
       # end
