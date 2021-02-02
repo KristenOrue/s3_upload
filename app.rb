@@ -97,10 +97,10 @@ when 'upload_folder'
     if inner_file.directory? 
       song_names= Dir.children(inner_file)
       s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
-  
-      # Dir.each_child(file) do |filename|
-      #   s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
-      # end
+    else
+      Dir.each_child(file) do |filename|
+        s3_client.put_object( bucket: bucket_name, key: "#{folder_name}/#{filename}")
+      end
     end
 }
    
