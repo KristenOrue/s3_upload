@@ -7,6 +7,7 @@
 require 'aws-sdk'
 require 'aws-sdk-s3'
 require 'pathname'
+require 'aws-sdk-dynamodb'
 
 #Command Line argument work
 NO_SUCH_BUCKET = "The bucket '%s' does not exist!"
@@ -36,7 +37,7 @@ DOC
 #assume the role
 role_credentials = Aws::AssumeRoleCredentials.new(
   client: Aws::STS::Client.new,
-  role_arn: "arn:aws:iam::589772831734:role/role4dan",
+  role_arn: "arn:aws:iam::589772831734:role/meusick-api-node-dev-us-east-1-lambdaRole",
   role_session_name: "s3-upload-session"
 )
 
@@ -93,6 +94,11 @@ when 'upload_artist'
       end      
     end
 }
+#Dir.each_child('test') do |e|
+#  Dir.each_child(dir + '/test/' + e) do |f|
+#   pp f
+#  end
+#end
     puts "SUCCESS: Artist'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
   end
 
@@ -130,20 +136,67 @@ when 'list'
     end
 
 #To rename an existing object inside of a bucket
-  when 'rename'
-    if file == nil && new_name == nil
-      puts "You must enter a file name and the new name of that file to rename!"
-      exit
-    else
-      file_name=File.basename file 
-      s3_client.copy_object(bucket: bucket_name,
-                   copy_source: "#{bucket_name}/#{file_name}",
-                   key: new_name)
+when 'rename'
+  if file == nil && new_name == nil
+    puts "You must enter a file name and the new name of that file to rename!"
+    exit
+  else
+    file_name=File.basename file 
+    s3_client.copy_object(bucket: bucket_name,
+                  copy_source: "#{bucket_name}/#{file_name}",
+                  key: new_name)
 
-      s3_client.delete_object(bucket: bucket_name,
-                     key: file_name)
-      puts "SUCCESS: File '#{file_name}' successfuly changed name to '#{new_name}'."
-    end
+    s3_client.delete_object(bucket: bucket_name,
+                    key: file_name)
+    puts "SUCCESS: File '#{file_name}' successfuly changed name to '#{new_name}'."
+  end
+
+when 'put'
+  def add_item_to_table(dynamodb_client, table_item)
+    dynamodb_client.put_item(table_item)
+    puts "Added song '#{table_item[:item][:genre]} " \
+      "(#{table_item[:item][:artist]})'."
+  rescue StandardError => e
+    puts "Error adding song '#{table_item[:item][:genre]} " \
+      "(#{table_item[:item][:artist]})': #{e.message}"
+  end
+
+  def run_me()
+    region = 'us-east-1'
+    table_name = 'music'
+    genre = 'Music Genre'
+    artist = "Artist Name"
+
+    # To use the downloadable version of Amazon DynamoDB,
+    # uncomment the endpoint statement.
+    Aws.config.update(
+      # endpoint: 'http://localhost:8000',
+      region: region
+    )
+
+    dynamodb_client = Aws::DynamoDB::Client.new
+
+    item = {
+      artist: artist,
+      genre: genre,
+      info: {
+        albums: 'Some album information.',
+        songs: 'Some song information.'
+      }
+    }
+
+    table_item = {
+      table_name: table_name,
+      item: item
+    }
+
+    puts "Adding song '#{item[:genre]} (#{item[:artist]})' " \
+      "to table '#{table_name}'..."
+    add_item_to_table(dynamodb_client, table_item)
+  end
+
+  run_me()
+
 else
   puts "Unknown operation: '%s'!" % operation
   puts USAGE
