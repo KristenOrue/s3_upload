@@ -186,9 +186,9 @@ when 'put_album'
 
     Dir.each_child(file) do |filename|
       next if filename == '.' or filename == '..'
-      puts "Adding: #{file}#{filename}..."
-      prepare_entry("song_by_album", album_name: file, song_name: filename)
-      prepare_entry("song_by_name", album_name: file, song_name: filename)
+      puts "Adding: #{folder_name}#{filename}..."
+      prepare_entry("song_by_album", album_name: folder_name, song_name: filename)
+      prepare_entry("song_by_name", album_name: folder_name, song_name: filename)
       s3_client.put_object({ bucket: bucket_name, key: "#{folder_name}/#{filename}"})
     end
     puts "SUCCESS: Album'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
@@ -205,22 +205,24 @@ when 'put_artist'
 
     folder_name = File.basename(file, ".*")
     artist = Pathname(folder_name)
-    prepare_entry("artist", artist_name: file)
+    prepare_entry("artist", artist_name: folder_name, genre_name: genre_name)
+    prepare_entry("genre", artist_name: folder_name, genre_name: genre_name)
+    
     albums = artist.children()
 
-    albums.each_child {|album| 
+    albums.each do |album| 
       if album.directory? 
         songs = Dir.each_child(album)
         album_path = album.to_s.split('/')
-        prepare_entry("album", artist_name: file, album_name: album_path[1])
+        prepare_entry("album", artist_name: folder_name, album_name: album_path[1])
         Dir.each_child(album) do |song_names|
-          prepare_entry("song_by_album", artist_name: file, album_name: album_path[1])
-          prepare_entry("song_by_name", artist_name: file, album_name: album_path[1])
-          puts "Adding: #{album}/#{song}..."
+          prepare_entry("song_by_album", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s)
+          prepare_entry("song_by_name", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s)
+          puts "Adding: #{album}/#{song_names}..."
+          s3_client.put_object( bucket: bucket_name, key: "#{album}/#{song_names}")
         end
-        s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
       end
-    }   
+    end   
     puts "SUCCESS: Artist'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."   
   end
 
