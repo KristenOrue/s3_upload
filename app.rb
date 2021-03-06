@@ -182,7 +182,7 @@ when 'put_album'
     exit
   else
     folder_name = File.basename(file, ".*")
-    prepare_entry("album", album_name: file, song_name: songs)
+    prepare_entry("album", album_name: folder_name)
 
     Dir.each_child(file) do |filename|
       next if filename == '.' or filename == '..'
