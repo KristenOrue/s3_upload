@@ -164,17 +164,17 @@ when 'put_song'
   if file == nil
     puts "You must enter a Song name!"
     exit
+  else
+    prepare_entry("song_by_name", song_name: file)
+  
+    puts "Adding: #{file}..."
+    s3_client.put_object({
+      bucket: bucket_name, 
+      key: file
+    })
+    puts "Song successfully Added, YOU DID IT!"
   end
-    prepare_entry("song", song_name: file)
-  
-  puts "Adding: #{file}..."
- 	s3.put_object({
-	  bucket: bucket_name, 
-	  key: file_name
-	})
-	puts "Song successfully Added, YOU DID IT!"
 
-  
 #When adding a new Album:
 when 'put_album'
 	if file == nil
@@ -187,7 +187,8 @@ when 'put_album'
     Dir.each_child(file) do |filename|
       next if filename == '.' or filename == '..'
       puts "Adding: #{file}#{filename}..."
-      prepare_entry("song", album_name: file, song_name: filename)
+      prepare_entry("song_by_album", album_name: file, song_name: filename)
+      prepare_entry("song_by_name", album_name: file, song_name: filename)
       s3_client.put_object({ bucket: bucket_name, key: "#{folder_name}/#{filename}"})
     end
     puts "SUCCESS: Album'#{folder_name}' successfuly uploaded to bucket '#{bucket_name}'."
@@ -199,6 +200,9 @@ when 'put_artist'
     puts "You must enter an Artist name!"
     exit
   else
+    puts "What is the song Genre?"
+    genre_name = STDIN.gets.chomp
+
     folder_name = File.basename(file, ".*")
     artist = Pathname(folder_name)
     prepare_entry("artist", artist_name: file)
@@ -211,7 +215,7 @@ when 'put_artist'
         prepare_entry("album", artist_name: file, album_name: album_path[1])
         Dir.each_child(album) do |song_names|
           prepare_entry("song_by_album", artist_name: file, album_name: album_path[1])
-          prepare_entry("song_by_album", artist_name: file, album_name: album_path[1])
+          prepare_entry("song_by_name", artist_name: file, album_name: album_path[1])
           puts "Adding: #{album}/#{song}..."
         end
         s3_client.put_object( bucket: bucket_name, key: "#{inner_file}/#{song_names}")
