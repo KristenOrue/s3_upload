@@ -71,13 +71,14 @@ rescue StandardError => e
     "(#{table_item[:item][:sk]})': #{e.message}"
 end
 
-def prepare_entry(obj_type, genre_name: nil, artist_name: nil, album_name: nil, song_name: nil)
+def prepare_entry(obj_type, genre_name: nil, artist_name: nil, album_name: nil, song_name: nil, song_path: nil)
   region = 'us-east-1'
   table_name = 'music'
   genre = genre_name
   artist = artist_name
   album = album_name
   song = song_name 
+  song_path = song_path
 
   Aws.config.update(
     region: region
@@ -93,7 +94,7 @@ def prepare_entry(obj_type, genre_name: nil, artist_name: nil, album_name: nil, 
 			genre: genre,
 			artist: artist,
 			albums: album,
-			song: song
+			song: song_path
 			}
 		}
 	elsif obj_type == "song_by_name"
@@ -104,7 +105,7 @@ def prepare_entry(obj_type, genre_name: nil, artist_name: nil, album_name: nil, 
 			genre: genre,
 			artist: artist,
 			albums: album,
-			song: song
+      song: song_path
 			}
 		}
   elsif obj_type == "album"
@@ -216,8 +217,8 @@ when 'put_artist'
         album_path = album.to_s.split('/')
         prepare_entry("album", artist_name: folder_name, album_name: album_path[1])
         Dir.each_child(album) do |song_names|
-          prepare_entry("song_by_album", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s)
-          prepare_entry("song_by_name", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s)
+          prepare_entry("song_by_album", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s, song_path: "#{album}/#{song_names}")
+          prepare_entry("song_by_name", artist_name: folder_name, album_name: album_path[1], song_name: song_names.to_s, song_path: "#{album}/#{song_names}")
           puts "Adding: #{album}/#{song_names}..."
           s3_client.put_object( bucket: bucket_name, key: "#{album}/#{song_names}")
         end
